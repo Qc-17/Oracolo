@@ -30,10 +30,8 @@
     font-family: 'IM Fell English SC', serif;
     color: var(--ink);
     padding: 2rem;
-    gap: 0;
   }
 
-  /* Decorative top rule */
   .rule {
     width: min(400px, 90vw);
     display: flex;
@@ -70,7 +68,6 @@
     text-transform: uppercase;
   }
 
-  /* The orb */
   .orb-wrap {
     position: relative;
     width: clamp(200px, 50vw, 260px);
@@ -103,17 +100,14 @@
   .orb::before {
     content: '';
     position: absolute;
-    top: 12%;
-    left: 20%;
-    width: 28%;
-    height: 18%;
+    top: 12%; left: 20%;
+    width: 28%; height: 18%;
     background: radial-gradient(ellipse, rgba(255,240,180,0.18), transparent);
     border-radius: 50%;
     transform: rotate(-20deg);
     pointer-events: none;
   }
 
-  /* Swirling inner mist */
   .orb-mist {
     position: absolute;
     inset: 0;
@@ -151,7 +145,6 @@
   }
   .orb-wrap:active .orb { transform: scale(0.97); }
 
-  /* Ripple on click */
   .orb-ripple {
     position: absolute;
     inset: -4px;
@@ -168,7 +161,6 @@
     100% { transform: scale(1.2); opacity: 0; }
   }
 
-  /* Answer scroll */
   .scroll {
     position: relative;
     width: min(440px, 92vw);
@@ -183,7 +175,7 @@
     content: '';
     position: absolute;
     left: 0; right: 0;
-    height: 3px;
+    height: 1px;
     background: linear-gradient(90deg, transparent, var(--gold), transparent);
   }
   .scroll::before { top: 0; }
@@ -209,18 +201,16 @@
     margin-bottom: 1.8rem;
   }
 
-  /* Bottom rule (mirrored) */
-  .rule-bottom {
-    margin-top: 0.6rem;
-    margin-bottom: 0;
-  }
+  .rule-bottom { margin-top: 0.6rem; }
 </style>
 </head>
 <body>
 
 <div class="rule">
-  <span></span><div class="rule-diamond"></div>
-  <div class="rule-diamond"></div><div class="rule-diamond"></div>
+  <span></span>
+  <div class="rule-diamond"></div>
+  <div class="rule-diamond"></div>
+  <div class="rule-diamond"></div>
   <span></span>
 </div>
 
@@ -242,15 +232,15 @@
 <p class="hint" id="hint">Tocca la sfera per consultare l'oracolo</p>
 
 <div class="rule rule-bottom">
-  <span></span><div class="rule-diamond"></div>
-  <div class="rule-diamond"></div><div class="rule-diamond"></div>
+  <span></span>
+  <div class="rule-diamond"></div>
+  <div class="rule-diamond"></div>
+  <div class="rule-diamond"></div>
   <span></span>
 </div>
 
 <script>
-// Inline del programma LINE (evita fetch per semplicità di deploy)
-
-const PROGRAMMA = await fetch('oracolo.line').then(r => r.text());
+const PROGRAMMA = `TAKE rand\nSTAY frasi = [Le stelle tacciono ma sanno. ; Chiedi al vento — lui ricorda tutto. ; La risposta e' gia' dentro di te. ; Il destino sorride a chi osa. ; Nebbia oggi. Chiarezza domani. ; Qualcosa sta per cambiare. ; Non e' il momento. Aspetta. ; Si'. Senza dubbi. ; Il cielo dice: forse. ; Occhio a chi ti sta vicino. ; Meglio non sapere. ; La fortuna ha gia' scelto. ; Torna a chiedere a mezzanotte. ; Il passato suggerisce di si'. ; Lascia andare e vedrai. ; Tre volte si. ; Le acque sono agitate. Attendi. ; Il tuo istinto non sbaglia. ; Qualcuno pensa a te in questo momento. ; La risposta e' no. Ma non per sempre.]\nrisposta = rand_pick(@frasi)\nOUT @risposta`;
 
 const orb    = document.getElementById('orb');
 const answer = document.getElementById('answer');
@@ -261,12 +251,10 @@ async function consulta() {
   if (busy) return;
   busy = true;
 
-  // Ripple
   orb.classList.remove('pulse');
   void orb.offsetWidth;
   orb.classList.add('pulse');
 
-  // Fade out risposta precedente
   answer.classList.add('hidden');
 
   let risultato = '';
@@ -275,7 +263,6 @@ async function consulta() {
     input:  () => Promise.resolve('')
   });
 
-  // Breve attesa per drammaticità, poi fade in
   await new Promise(r => setTimeout(r, 380));
   answer.textContent = risultato || '…';
   answer.classList.remove('hidden');
