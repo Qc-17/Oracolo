@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>L'Oracolo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=IM+Fell+English+SC&display=swap" rel="stylesheet">
+<script src="https://qc-17.github.io/LINE/interpreter.js"></script>
+<style>
+  :root {
+    --ink:   #1a0a00;
+    --paper: #f5ead6;
+    --gold:  #b8860b;
+    --gold2: #e8c96a;
+    --smoke: #8b7355;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    min-height: 100dvh;
+    background: var(--paper);
+    background-image:
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='400' height='400' filter='url(%23n)' opacity='0.07'/%3E%3C/svg%3E");
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-family: 'IM Fell English SC', serif;
+    color: var(--ink);
+    padding: 2rem;
+    gap: 0;
+  }
+
+  /* Decorative top rule */
+  .rule {
+    width: min(400px, 90vw);
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1.8rem;
+  }
+  .rule span { flex: 1; height: 1px; background: var(--gold); }
+  .rule-diamond {
+    width: 8px; height: 8px;
+    background: var(--gold);
+    transform: rotate(45deg);
+    flex-shrink: 0;
+  }
+
+  h1 {
+    font-family: 'Cinzel', serif;
+    font-size: clamp(2.2rem, 7vw, 3.8rem);
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    color: var(--gold);
+    text-shadow: 0 2px 8px rgba(184,134,11,0.25);
+    text-align: center;
+    line-height: 1;
+    margin-bottom: 0.3rem;
+  }
+
+  .subtitle {
+    font-size: 0.78rem;
+    letter-spacing: 0.35em;
+    color: var(--smoke);
+    text-align: center;
+    margin-bottom: 3rem;
+    text-transform: uppercase;
+  }
+
+  /* The orb */
+  .orb-wrap {
+    position: relative;
+    width: clamp(200px, 50vw, 260px);
+    height: clamp(200px, 50vw, 260px);
+    margin-bottom: 2.8rem;
+    cursor: pointer;
+  }
+
+  .orb {
+    width: 100%; height: 100%;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 32%,
+      #6b4e2a 0%,
+      #2c1a08 45%,
+      #0d0704 100%);
+    box-shadow:
+      0 0 0 2px var(--gold),
+      0 0 0 5px rgba(184,134,11,0.15),
+      0 0 40px rgba(184,134,11,0.12),
+      inset 0 -8px 32px rgba(0,0,0,0.6),
+      inset 0 8px 24px rgba(255,220,120,0.08);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .orb::before {
+    content: '';
+    position: absolute;
+    top: 12%;
+    left: 20%;
+    width: 28%;
+    height: 18%;
+    background: radial-gradient(ellipse, rgba(255,240,180,0.18), transparent);
+    border-radius: 50%;
+    transform: rotate(-20deg);
+    pointer-events: none;
+  }
+
+  /* Swirling inner mist */
+  .orb-mist {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: conic-gradient(
+      from 0deg,
+      transparent 0%,
+      rgba(184,134,11,0.04) 20%,
+      transparent 40%,
+      rgba(184,134,11,0.06) 60%,
+      transparent 80%
+    );
+    animation: swirl 8s linear infinite;
+    pointer-events: none;
+  }
+  @keyframes swirl { to { transform: rotate(360deg); } }
+
+  .orb-symbol {
+    font-size: clamp(2.8rem, 10vw, 4rem);
+    color: rgba(232,201,106,0.7);
+    user-select: none;
+    position: relative;
+    z-index: 2;
+    transition: opacity 0.3s;
+  }
+
+  .orb-wrap:hover .orb {
+    transform: scale(1.03);
+    box-shadow:
+      0 0 0 2px var(--gold2),
+      0 0 0 6px rgba(184,134,11,0.25),
+      0 0 60px rgba(184,134,11,0.22),
+      inset 0 -8px 32px rgba(0,0,0,0.6),
+      inset 0 8px 24px rgba(255,220,120,0.10);
+  }
+  .orb-wrap:active .orb { transform: scale(0.97); }
+
+  /* Ripple on click */
+  .orb-ripple {
+    position: absolute;
+    inset: -4px;
+    border-radius: 50%;
+    border: 2px solid var(--gold2);
+    opacity: 0;
+    pointer-events: none;
+  }
+  .orb-wrap.pulse .orb-ripple {
+    animation: ripple 0.7s ease-out forwards;
+  }
+  @keyframes ripple {
+    0%   { transform: scale(0.9); opacity: 0.7; }
+    100% { transform: scale(1.2); opacity: 0; }
+  }
+
+  /* Answer scroll */
+  .scroll {
+    position: relative;
+    width: min(440px, 92vw);
+    min-height: 90px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.4rem 2.2rem;
+    margin-bottom: 2rem;
+  }
+  .scroll::before, .scroll::after {
+    content: '';
+    position: absolute;
+    left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  }
+  .scroll::before { top: 0; }
+  .scroll::after  { bottom: 0; }
+
+  .answer {
+    font-size: clamp(1rem, 3.5vw, 1.25rem);
+    text-align: center;
+    line-height: 1.6;
+    letter-spacing: 0.04em;
+    color: var(--ink);
+    min-height: 2em;
+    transition: opacity 0.4s ease;
+  }
+  .answer.hidden { opacity: 0; }
+
+  .hint {
+    font-size: 0.72rem;
+    letter-spacing: 0.3em;
+    color: var(--smoke);
+    text-align: center;
+    text-transform: uppercase;
+    margin-bottom: 1.8rem;
+  }
+
+  /* Bottom rule (mirrored) */
+  .rule-bottom {
+    margin-top: 0.6rem;
+    margin-bottom: 0;
+  }
+</style>
+</head>
+<body>
+
+<div class="rule">
+  <span></span><div class="rule-diamond"></div>
+  <div class="rule-diamond"></div><div class="rule-diamond"></div>
+  <span></span>
+</div>
+
+<h1>L'Oracolo</h1>
+<p class="subtitle">Interroga il mistero</p>
+
+<div class="orb-wrap" id="orb" title="Consulta l'oracolo">
+  <div class="orb">
+    <div class="orb-mist"></div>
+    <div class="orb-symbol">✦</div>
+  </div>
+  <div class="orb-ripple"></div>
+</div>
+
+<div class="scroll">
+  <p class="answer hidden" id="answer">…</p>
+</div>
+
+<p class="hint" id="hint">Tocca la sfera per consultare l'oracolo</p>
+
+<div class="rule rule-bottom">
+  <span></span><div class="rule-diamond"></div>
+  <div class="rule-diamond"></div><div class="rule-diamond"></div>
+  <span></span>
+</div>
+
+<script>
+// Inline del programma LINE (evita fetch per semplicità di deploy)
+const PROGRAMMA = `
+TAKE rand
+
+STAY frasi = [
+  Le stelle tacciono ma sanno. ;
+  Chiedi al vento — lui ricorda tutto. ;
+  La risposta e' gia' dentro di te. ;
+  Il destino sorride a chi osa. ;
+  Nebbia oggi. Chiarezza domani. ;
+  Qualcosa sta per cambiare. ;
+  Non e' il momento. Aspetta. ;
+  Si'. Senza dubbi. ;
+  Il cielo dice: forse. ;
+  Occhio a chi ti sta vicino. ;
+  Meglio non sapere. ;
+  La fortuna ha gia' scelto. ;
+  Torna a chiedere a mezzanotte. ;
+  Il passato suggerisce di si'. ;
+  Lascia andare e vedrai. ;
+  Tre volte si. ;
+  Le acque sono agitate. Attendi. ;
+  Il tuo istinto non sbaglia. ;
+  Qualcuno pensa a te in questo momento. ;
+  La risposta e' no. Ma non per sempre.
+]
+
+risposta = rand_pick(@frasi)
+OUT @risposta
+`;
+
+const orb    = document.getElementById('orb');
+const answer = document.getElementById('answer');
+const hint   = document.getElementById('hint');
+let busy = false;
+
+async function consulta() {
+  if (busy) return;
+  busy = true;
+
+  // Ripple
+  orb.classList.remove('pulse');
+  void orb.offsetWidth;
+  orb.classList.add('pulse');
+
+  // Fade out risposta precedente
+  answer.classList.add('hidden');
+
+  let risultato = '';
+  await LINE_run(PROGRAMMA, {
+    output: s => { risultato = s; },
+    input:  () => Promise.resolve('')
+  });
+
+  // Breve attesa per drammaticità, poi fade in
+  await new Promise(r => setTimeout(r, 380));
+  answer.textContent = risultato || '…';
+  answer.classList.remove('hidden');
+  hint.textContent = 'Consulta di nuovo';
+  busy = false;
+}
+
+orb.addEventListener('click', consulta);
+</script>
+</body>
+</html>
