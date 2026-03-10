@@ -1,27 +1,6 @@
 TAKE rand
 
-STAY frasi = [
-  Le stelle tacciono ma sanno. ;
-  Chiedi al vento — lui ricorda tutto. ;
-  La risposta e' gia' dentro di te. ;
-  Il destino sorride a chi osa. ;
-  Nebbia oggi. Chiarezza domani. ;
-  Qualcosa sta per cambiare. ;
-  Non e' il momento. Aspetta. ;
-  Si'. Senza dubbi. ;
-  Il cielo dice: forse. ;
-  Occhio a chi ti sta vicino. ;
-  Meglio non sapere. ;
-  La fortuna ha gia' scelto. ;
-  Torna a chiedere a mezzanotte. ;
-  Il passato suggerisce di si'. ;
-  Lascia andare e vedrai. ;
-  Tre volte si. ;
-  Le acque sono agitate. Attendi. ;
-  Il tuo istinto non sbaglia. ;
-  Qualcuno pensa a te in questo momento. ;
-  La risposta e' no. Ma non per sempre.
-]
+STAY frasi = [Le stelle tacciono ma sanno. ; Chiedi al vento — lui ricorda tutto. ; La risposta e' gia' dentro di te. ; Il destino sorride a chi osa. ; Nebbia oggi. Chiarezza domani. ; Qualcosa sta per cambiare. ; Non e' il momento. Aspetta. ; Si'. Senza dubbi. ; Il cielo dice: forse. ; Occhio a chi ti sta vicino. ; Meglio non sapere. ; La fortuna ha gia' scelto. ; Torna a chiedere a mezzanotte. ; Il passato suggerisce di si'. ; Lascia andare e vedrai. ; Tre volte si. ; Le acque sono agitate. Attendi. ; Il tuo istinto non sbaglia. ; Qualcuno pensa a te in questo momento. ; La risposta e' no. Ma non per sempre.]
 
 risposta = rand_pick(@frasi)
-OUT @risposta
+TALK @risposta
