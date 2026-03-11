@@ -162,11 +162,13 @@ STAY note_f = [Una svolta si avvicina. ; Forze rare si muovono. ; Questo momento
 
 STAY ultra = [L'oracolo trema. Questo quasi non accade mai. ; Le sfere si allineano in modo incomprensibile. ; Un segno che si vede una volta nella vita.]
 
+frase = 
+nota = 
+
 #dado   = rand_int(1, 100)
 #intens = rand_int(1, 3)
 #raro   = rand_int(1, 20)
 
->> Peso categoria in base all'ora: notte piu' misterioso, mattina piu' positivo
 ora = io_time()
 #h = str_num(str_sub(@ora, 0, 2))
 GO @{@h >= 22 VEL @h < 6} @{ #dado += 20 }
@@ -174,7 +176,7 @@ GO @{@h >= 22 VEL @h < 6} @{ #dado += 20 }
 #dado = math_clamp(@dado, 1, 100)
 
 GO @{@raro == 1} @{
-  frase = rand_pick(@ultra)
+  @frase = rand_pick(@ultra)
   OUT cat:ultra
   OUT sym:☽
   OUT badge:Responso rarissimo — consulta @consulte
@@ -183,8 +185,8 @@ GO @{@raro == 1} @{
   OUT vel:3
 
 } & @{@dado <= 40} @{
-  GO @{@intens == 1} @{ frase = rand_pick(@pb) } & @{@intens == 2} @{ frase = rand_pick(@pm) } && @{ frase = rand_pick(@pf) }
-  GO @{@intens == 1} @{ nota = rand_pick(@note_b) } & @{@intens == 2} @{ nota = rand_pick(@note_m) } && @{ nota = rand_pick(@note_f) }
+  GO @{@intens == 1} @{ @frase = rand_pick(@pb) } & @{@intens == 2} @{ @frase = rand_pick(@pm) } && @{ @frase = rand_pick(@pf) }
+  GO @{@intens == 1} @{ @nota = rand_pick(@note_b) } & @{@intens == 2} @{ @nota = rand_pick(@note_m) } && @{ @nota = rand_pick(@note_f) }
   OUT cat:positivo
   OUT sym:✦
   OUT badge:Responso favorevole — intensita' @intens su 3
@@ -193,8 +195,8 @@ GO @{@raro == 1} @{
   OUT vel:@intens
 
 } & @{@dado <= 70} @{
-  GO @{@intens == 1} @{ frase = rand_pick(@nb) } & @{@intens == 2} @{ frase = rand_pick(@nm) } && @{ frase = rand_pick(@nf) }
-  GO @{@intens == 1} @{ nota = rand_pick(@note_b) } & @{@intens == 2} @{ nota = rand_pick(@note_m) } && @{ nota = rand_pick(@note_f) }
+  GO @{@intens == 1} @{ @frase = rand_pick(@nb) } & @{@intens == 2} @{ @frase = rand_pick(@nm) } && @{ @frase = rand_pick(@nf) }
+  GO @{@intens == 1} @{ @nota = rand_pick(@note_b) } & @{@intens == 2} @{ @nota = rand_pick(@note_m) } && @{ @nota = rand_pick(@note_f) }
   OUT cat:negativo
   OUT sym:✸
   OUT badge:Presagio oscuro — intensita' @intens su 3
@@ -203,8 +205,8 @@ GO @{@raro == 1} @{
   OUT vel:@intens
 
 } && @{
-  GO @{@intens == 1} @{ frase = rand_pick(@mb) } & @{@intens == 2} @{ frase = rand_pick(@mm) } && @{ frase = rand_pick(@mf) }
-  GO @{@intens == 1} @{ nota = rand_pick(@note_b) } & @{@intens == 2} @{ nota = rand_pick(@note_m) } && @{ nota = rand_pick(@note_f) }
+  GO @{@intens == 1} @{ @frase = rand_pick(@mb) } & @{@intens == 2} @{ @frase = rand_pick(@mm) } && @{ @frase = rand_pick(@mf) }
+  GO @{@intens == 1} @{ @nota = rand_pick(@note_b) } & @{@intens == 2} @{ @nota = rand_pick(@note_m) } && @{ @nota = rand_pick(@note_f) }
   OUT cat:misterioso
   OUT sym:✧
   OUT badge:I segni sono velati — intensita' @intens su 3
