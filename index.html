@@ -80,19 +80,17 @@
     width: 100%; height: 100%;
     border-radius: 50%;
     background: radial-gradient(circle at 35% 32%,
-      #6b4e2a 0%,
-      #2c1a08 45%,
-      #0d0704 100%);
+      #6b4e2a 0%, #2c1a08 45%, #0d0704 100%);
     box-shadow:
-      0 0 0 2px var(--gold),
-      0 0 0 5px rgba(184,134,11,0.15),
-      0 0 40px rgba(184,134,11,0.12),
+      0 0 0 2px var(--orb-ring, var(--gold)),
+      0 0 0 5px var(--orb-halo, rgba(184,134,11,0.15)),
+      0 0 40px var(--orb-glow, rgba(184,134,11,0.12)),
       inset 0 -8px 32px rgba(0,0,0,0.6),
       inset 0 8px 24px rgba(255,220,120,0.08);
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: transform 0.15s ease, box-shadow 0.15s ease;
+    transition: transform 0.15s ease, box-shadow 0.4s ease;
     position: relative;
     overflow: hidden;
   }
@@ -122,6 +120,7 @@
     );
     animation: swirl 8s linear infinite;
     pointer-events: none;
+    transition: background 0.6s ease;
   }
   @keyframes swirl { to { transform: rotate(360deg); } }
 
@@ -131,19 +130,16 @@
     user-select: none;
     position: relative;
     z-index: 2;
-    transition: opacity 0.3s;
+    transition: color 0.4s ease;
   }
 
-  .orb-wrap:hover .orb {
-    transform: scale(1.03);
-    box-shadow:
-      0 0 0 2px var(--gold2),
-      0 0 0 6px rgba(184,134,11,0.25),
-      0 0 60px rgba(184,134,11,0.22),
-      inset 0 -8px 32px rgba(0,0,0,0.6),
-      inset 0 8px 24px rgba(255,220,120,0.10);
-  }
+  .orb-wrap:hover .orb { transform: scale(1.03); }
   .orb-wrap:active .orb { transform: scale(0.97); }
+
+  /* Colori per categoria */
+  .orb-wrap.positivo  { --orb-ring: #4caf50; --orb-halo: rgba(76,175,80,0.2); --orb-glow: rgba(76,175,80,0.18); }
+  .orb-wrap.negativo  { --orb-ring: #c62828; --orb-halo: rgba(198,40,40,0.2); --orb-glow: rgba(198,40,40,0.18); }
+  .orb-wrap.misterioso{ --orb-ring: #7b1fa2; --orb-halo: rgba(123,31,162,0.2); --orb-glow: rgba(123,31,162,0.18); }
 
   .orb-ripple {
     position: absolute;
@@ -166,10 +162,12 @@
     width: min(440px, 92vw);
     min-height: 90px;
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
+    gap: 0.5rem;
     padding: 1.4rem 2.2rem;
-    margin-bottom: 2rem;
+    margin-bottom: 1.2rem;
   }
   .scroll::before, .scroll::after {
     content: '';
@@ -180,6 +178,19 @@
   }
   .scroll::before { top: 0; }
   .scroll::after  { bottom: 0; }
+
+  .categoria {
+    font-size: 0.65rem;
+    letter-spacing: 0.4em;
+    text-transform: uppercase;
+    opacity: 0;
+    transition: opacity 0.4s ease, color 0.4s ease;
+    min-height: 1em;
+  }
+  .categoria.positivo  { color: #4caf50; }
+  .categoria.negativo  { color: #c62828; }
+  .categoria.misterioso{ color: #7b1fa2; }
+  .categoria.visible   { opacity: 1; }
 
   .answer {
     font-size: clamp(1rem, 3.5vw, 1.25rem);
@@ -220,12 +231,13 @@
 <div class="orb-wrap" id="orb" title="Consulta l'oracolo">
   <div class="orb">
     <div class="orb-mist"></div>
-    <div class="orb-symbol">✦</div>
+    <div class="orb-symbol" id="orb-symbol">✦</div>
   </div>
   <div class="orb-ripple"></div>
 </div>
 
 <div class="scroll">
+  <p class="categoria" id="categoria"></p>
   <p class="answer hidden" id="answer">…</p>
 </div>
 
@@ -240,37 +252,57 @@
 </div>
 
 <script>
-const PROGRAMMA = `TAKE rand\nSTAY frasi = [Le stelle tacciono ma sanno. ; Chiedi al vento — lui ricorda tutto. ; La risposta e' gia' dentro di te. ; Il destino sorride a chi osa. ; Nebbia oggi. Chiarezza domani. ; Qualcosa sta per cambiare. ; Non e' il momento. Aspetta. ; Si'. Senza dubbi. ; Il cielo dice: forse. ; Occhio a chi ti sta vicino. ; Meglio non sapere. ; La fortuna ha gia' scelto. ; Torna a chiedere a mezzanotte. ; Il passato suggerisce di si'. ; Lascia andare e vedrai. ; Tre volte si. ; Le acque sono agitate. Attendi. ; Il tuo istinto non sbaglia. ; Qualcuno pensa a te in questo momento. ; La risposta e' no. Ma non per sempre.]\nrisposta = rand_pick(@frasi)\nOUT @risposta`;
+const PROGRAMMA = `TAKE rand\nSTAY pos = [Il destino sorride. ; Procedi senza paura. ; Si'. Senza ombra di dubbio. ; Le stelle sono dalla tua parte. ; Il momento e' propizio. ; Grande fortuna si avvicina. ; Tutto andra' per il meglio. ; L'universo dice di si'. ; Fidati del tuo istinto. ; La via e' aperta.]\nSTAY neg = [Non e' il momento. ; Le acque sono agitate. Attendi. ; La risposta e' no. ; Qualcosa non torna. ; Il cielo e' coperto. ; Torna a chiedere domani. ; Le forze frenano. ; Meglio aspettare. ; Occhio a cio' che non vedi. ; Il vento soffia contro.]\nSTAY mis = [Il futuro tace. ; Ne' si ne' no. ; Solo il tempo rivela. ; Il mistero persiste. ; L'oracolo vede nebbia. ; Forse. Ma non e' detto. ; La risposta e' nascosta. ; Chiedi al silenzio. ; I segni sono ambigui. ; Due strade. Nessuna mappa.]\n#dado = rand_int(1, 3)\nGO @{@dado == 1} @{\n  ris = rand_pick(@pos)\n  OUT positivo\n  OUT @ris\n} & @{@dado == 2} @{\n  ris = rand_pick(@neg)\n  OUT negativo\n  OUT @ris\n} && @{\n  ris = rand_pick(@mis)\n  OUT misterioso\n  OUT @ris\n}`;
 
-const orb    = document.getElementById('orb');
-const answer = document.getElementById('answer');
-const hint   = document.getElementById('hint');
+const orbWrap = document.getElementById('orb');
+const symbol  = document.getElementById('orb-symbol');
+const catEl   = document.getElementById('categoria');
+const answer  = document.getElementById('answer');
+const hint    = document.getElementById('hint');
+
+const SIMBOLI = { positivo: '✦', negativo: '✸', misterioso: '✧' };
+const LABEL   = { positivo: 'Responso favorevole', negativo: 'Presagio oscuro', misterioso: 'I segni sono velati' };
+
 let busy = false;
 
 async function consulta() {
   if (busy) return;
   busy = true;
 
-  orb.classList.remove('pulse');
-  void orb.offsetWidth;
-  orb.classList.add('pulse');
+  orbWrap.classList.remove('pulse', 'positivo', 'negativo', 'misterioso');
+  void orbWrap.offsetWidth;
+  orbWrap.classList.add('pulse');
 
   answer.classList.add('hidden');
+  catEl.classList.remove('visible', 'positivo', 'negativo', 'misterioso');
 
-  let risultato = '';
+  const righe = [];
   await LINE_run(PROGRAMMA, {
-    output: s => { risultato = s; },
+    output: s => righe.push(s),
     input:  () => Promise.resolve('')
   });
 
+  // Prima riga = categoria, seconda = testo
+  const cat  = (righe[0] || '').trim();
+  const text = (righe[1] || righe[0] || '…').trim();
+
   await new Promise(r => setTimeout(r, 380));
-  answer.textContent = risultato || '…';
+
+  // Applica classe categoria all'orb e al badge
+  if (cat === 'positivo' || cat === 'negativo' || cat === 'misterioso') {
+    orbWrap.classList.add(cat);
+    catEl.textContent = LABEL[cat] || cat;
+    catEl.className = `categoria ${cat} visible`;
+    symbol.textContent = SIMBOLI[cat];
+  }
+
+  answer.textContent = text;
   answer.classList.remove('hidden');
   hint.textContent = 'Consulta di nuovo';
   busy = false;
 }
 
-orb.addEventListener('click', consulta);
+orbWrap.addEventListener('click', consulta);
 </script>
 </body>
 </html>
