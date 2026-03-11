@@ -10,235 +10,131 @@
 <script src="https://qc-17.github.io/LINE/line-dom.js"></script>
 <style>
   :root {
-    --bg:    #050505;
-    --fg:    #c8bfb0;
-    --dim:   #3a3530;
-    --pos:   #c8a86a;
-    --neg:   #a04040;
-    --mis:   #5a6a8a;
-    --ultra: #d4af37;
-    --accent: var(--pos);
+    --bg: #050505; --fg: #c8bfb0; --dim: #3a3530;
+    --pos: #c8a86a; --neg: #a04040; --mis: #5a6a8a; --ultra: #d4af37;
+    --accent: var(--dim);
   }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; background: var(--bg); color: var(--fg); font-family: 'Cormorant Garamond', serif; overflow: hidden; }
 
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-
-  html, body {
-    height: 100%; width: 100%;
-    background: var(--bg);
-    color: var(--fg);
-    font-family: 'Cormorant Garamond', serif;
-    overflow: hidden;
-  }
-
-  /* Grain overlay */
   body::before {
-    content: '';
-    position: fixed; inset: 0; z-index: 0; pointer-events: none;
+    content: ''; position: fixed; inset: 0; z-index: 0; pointer-events: none;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23g)' opacity='0.045'/%3E%3C/svg%3E");
     background-size: 300px;
   }
-
-  /* Vignette */
   body::after {
-    content: '';
-    position: fixed; inset: 0; z-index: 0; pointer-events: none;
+    content: ''; position: fixed; inset: 0; z-index: 0; pointer-events: none;
     background: radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,.85) 100%);
   }
 
-  /* Layout */
   #shell {
-    position: relative; z-index: 1;
-    height: 100dvh;
-    display: grid;
-    grid-template-rows: 1fr auto 1fr;
-    grid-template-columns: 1fr;
-    align-items: center;
-    justify-items: center;
-    padding: 2rem;
+    position: relative; z-index: 1; height: 100dvh;
+    display: grid; grid-template-rows: 1fr auto 1fr;
+    align-items: center; justify-items: center;
+    padding: 2rem; animation: fadein 1.2s ease both;
   }
+  @keyframes fadein { from { opacity: 0; } to { opacity: 1; } }
 
-  /* Top: titolo + contatore */
-  #top {
-    align-self: end;
-    text-align: center;
-    padding-bottom: 2.5rem;
-  }
+  #top { align-self: end; text-align: center; padding-bottom: 2.5rem; }
 
   #titolo {
-    font-size: clamp(1rem, 4vw, 1.4rem);
-    font-weight: 300;
-    letter-spacing: .6em;
-    text-transform: uppercase;
-    color: var(--dim);
-    margin-bottom: .6rem;
-    transition: color .8s;
+    font-size: clamp(1rem, 4vw, 1.4rem); font-weight: 300;
+    letter-spacing: .6em; text-transform: uppercase;
+    color: var(--dim); margin-bottom: .6rem;
   }
-
   #contatore {
-    font-family: 'Courier Prime', monospace;
-    font-size: .62rem;
-    letter-spacing: .25em;
-    color: var(--dim);
-    min-height: 1em;
-    transition: color .6s;
+    font-family: 'Courier Prime', monospace; font-size: .62rem;
+    letter-spacing: .25em; color: var(--dim); min-height: 1em;
   }
 
-  /* Centro: il responso */
-  #centro {
-    width: 100%;
-    max-width: 640px;
-    text-align: center;
-    padding: 0 1rem;
-  }
+  #centro { width: 100%; max-width: 640px; text-align: center; padding: 0 1rem; }
 
   #simbolo {
-    display: block;
-    font-size: clamp(1.8rem, 5vw, 2.6rem);
-    margin-bottom: 1.4rem;
-    opacity: .15;
+    display: block; font-size: clamp(1.8rem, 5vw, 2.6rem);
+    margin-bottom: 1.4rem; min-height: 1em;
+    color: var(--accent); opacity: .15;
     transition: opacity 1s, color .8s;
-    min-height: 1em;
   }
   body.active #simbolo { opacity: .7; }
 
   #frase {
-    font-size: clamp(1.6rem, 4.5vw, 2.8rem);
-    font-weight: 300;
-    font-style: italic;
-    line-height: 1.35;
-    letter-spacing: .02em;
-    color: var(--fg);
-    opacity: 0;
-    transform: translateY(6px);
+    font-size: clamp(1.6rem, 4.5vw, 2.8rem); font-weight: 300;
+    font-style: italic; line-height: 1.35; letter-spacing: .02em;
+    opacity: 0; transform: translateY(6px); min-height: 1.35em;
     transition: opacity .9s, transform .9s, color .8s;
-    min-height: 1.35em;
   }
   body.active #frase { opacity: 1; transform: translateY(0); }
 
   #badge {
-    display: block;
-    margin-top: 1.2rem;
-    font-family: 'Courier Prime', monospace;
-    font-size: .6rem;
-    letter-spacing: .35em;
-    text-transform: uppercase;
-    color: var(--dim);
-    opacity: 0;
+    display: block; margin-top: 1.2rem;
+    font-family: 'Courier Prime', monospace; font-size: .6rem;
+    letter-spacing: .35em; text-transform: uppercase;
+    color: var(--accent); opacity: 0; min-height: 1em;
     transition: opacity .6s .3s, color .8s;
-    min-height: 1em;
   }
   body.active #badge { opacity: 1; }
 
-  /* Bottom: pulsante */
-  #bottom {
-    align-self: start;
-    padding-top: 3rem;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 1rem;
-  }
+  #bottom { align-self: start; padding-top: 3rem; display: flex; flex-direction: column; align-items: center; gap: 1rem; }
 
   #trigger {
-    background: none;
-    border: none;
-    cursor: pointer;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: .6rem;
-    padding: .5rem 1.5rem;
-    position: relative;
+    background: none; border: none; cursor: pointer;
+    display: flex; flex-direction: column; align-items: center;
+    gap: .6rem; padding: .5rem 1.5rem;
   }
-
-  /* La linea-pulsante */
   #trigger::before, #trigger::after {
-    content: '';
-    display: block;
-    width: 60px; height: 1px;
-    background: var(--dim);
-    transition: width .4s, background .4s;
+    content: ''; display: block; width: 60px; height: 1px;
+    background: var(--dim); transition: width .4s, background .4s;
   }
   #trigger:hover::before, #trigger:hover::after { width: 100px; background: var(--accent); }
-
   #trigger-label {
-    font-family: 'Courier Prime', monospace;
-    font-size: .6rem;
-    letter-spacing: .4em;
-    text-transform: uppercase;
-    color: var(--dim);
-    transition: color .4s;
+    font-family: 'Courier Prime', monospace; font-size: .6rem;
+    letter-spacing: .4em; text-transform: uppercase;
+    color: var(--dim); transition: color .4s;
   }
   #trigger:hover #trigger-label { color: var(--accent); }
 
   #nota {
-    font-size: .78rem;
-    font-style: italic;
-    color: var(--dim);
-    text-align: center;
-    opacity: 0;
-    transition: opacity .6s .5s;
-    min-height: 1em;
-    max-width: 360px;
-    line-height: 1.5;
+    font-size: .78rem; font-style: italic; color: var(--dim);
+    text-align: center; opacity: 0; min-height: 1em;
+    max-width: 360px; line-height: 1.5; transition: opacity .6s .5s;
   }
   body.active #nota { opacity: .7; }
 
-  /* Colori per categoria — scritti da LINE in #cat, letti dal JS */
+  /* categorie — applicate da LINE via <classe> */
   body.positivo   { --accent: var(--pos); }
   body.negativo   { --accent: var(--neg); }
   body.misterioso { --accent: var(--mis); }
   body.ultra      { --accent: var(--ultra); }
 
-  /* Elemento nascosto che LINE usa per comunicare la categoria al JS */
-  #cat { display: none; }
-
-  /* Pulse ring attorno al trigger */
-  @keyframes pulse-ring {
-    0%   { transform: scale(.95); opacity: .5; }
-    100% { transform: scale(1.4); opacity: 0; }
-  }
-  #trigger.pulsing::before {
-    animation: pulse-ring .6s ease-out;
-  }
-
-  /* Fade page-in */
-  @keyframes fadein { from { opacity: 0; } to { opacity: 1; } }
-  #shell { animation: fadein 1.2s ease both; }
+  /* elemento nascosto per la classe */
+  #classe { display: none; }
 </style>
 </head>
 <body>
 
 <div id="shell">
-
   <div id="top">
     <div id="titolo">Oracolo</div>
     <div id="contatore"></div>
   </div>
-
   <div id="centro">
     <span id="simbolo"></span>
     <p id="frase"></p>
     <span id="badge"></span>
   </div>
-
   <div id="bottom">
-    <button id="trigger">
-      <span id="trigger-label">Interroga</span>
-    </button>
+    <button id="trigger"><span id="trigger-label">Interroga</span></button>
     <p id="nota"></p>
   </div>
-
 </div>
 
-<!-- Elemento nascosto: LINE ci scrive la categoria, il JS la legge -->
-<div id="cat"></div>
+<div id="classe"></div>
 
-<script>
-const ORACLE = `TAKE rand
+<script type="text/line" trigger="trigger" replace counter="classe" body-class="classe">
+TAKE rand
 TAKE str
 TAKE io
-#n = __N__
+
 STAY pb = [Il destino sorride. ; Procedi senza paura. ; Le stelle dicono si'.]
 STAY pm = [Grande fortuna si avvicina. ; L'universo e' con te. ; Il vento soffia a favore.]
 STAY pf = [Un evento raro ti sorrider' presto. ; Il cielo e' completamente aperto. ; Forza cosmica a tuo favore.]
@@ -252,23 +148,27 @@ STAY note_b = [Un piccolo passo. ; Fidati dell'istinto. ; Osserva prima di agire
 STAY note_m = [Le energie si muovono. ; Qualcosa si sta allineando. ; Il momento e' delicato.]
 STAY note_f = [Una svolta si avvicina. ; Forze rare si muovono. ; Questo momento e' unico.]
 STAY ultra = [L'oracolo trema. Questo quasi non accade mai. ; Le sfere si allineano in modo incomprensibile. ; Un segno che si vede una volta nella vita.]
-frase = 
-nota  = 
+
+frase =
+nota  =
+
 #dado   = rand_int(1, 100)
 #intens = rand_int(1, 3)
 #raro   = rand_int(1, 20)
+
 ora = io_time()
 #h = str_num(str_sub(@ora, 0, 2))
 GO @{@h >= 22 VEL @h < 6} @{ #dado += 20 }
 & @{@h >= 6 ET @h < 12}   @{ #dado -= 15 }
 #dado = math_clamp(@dado, 1, 100)
+
 GO @{@raro == 1} @{
   @frase = rand_pick(@ultra)
   <simbolo>OUT ☽</simbolo>
-  <badge>OUT RESPONSO RARISSIMO — CONSULTA @n</badge>
+  <badge>OUT RESPONSO RARISSIMO</badge>
   <frase>OUT @frase</frase>
   <nota>OUT Questo accade una volta su venti.</nota>
-  <cat>OUT ultra</cat>
+  <classe>OUT active ultra</classe>
 } & @{@dado <= 40} @{
   GO @{@intens==1} @{ @frase=rand_pick(@pb) } & @{@intens==2} @{ @frase=rand_pick(@pm) } && @{ @frase=rand_pick(@pf) }
   GO @{@intens==1} @{ @nota=rand_pick(@note_b) } & @{@intens==2} @{ @nota=rand_pick(@note_m) } && @{ @nota=rand_pick(@note_f) }
@@ -276,7 +176,7 @@ GO @{@raro == 1} @{
   <badge>OUT RESPONSO FAVOREVOLE — INTENSITA' @intens / 3</badge>
   <frase>OUT @frase</frase>
   <nota>OUT @nota</nota>
-  <cat>OUT positivo</cat>
+  <classe>OUT active positivo</classe>
 } & @{@dado <= 70} @{
   GO @{@intens==1} @{ @frase=rand_pick(@nb) } & @{@intens==2} @{ @frase=rand_pick(@nm) } && @{ @frase=rand_pick(@nf) }
   GO @{@intens==1} @{ @nota=rand_pick(@note_b) } & @{@intens==2} @{ @nota=rand_pick(@note_m) } && @{ @nota=rand_pick(@note_f) }
@@ -284,7 +184,7 @@ GO @{@raro == 1} @{
   <badge>OUT PRESAGIO OSCURO — INTENSITA' @intens / 3</badge>
   <frase>OUT @frase</frase>
   <nota>OUT @nota</nota>
-  <cat>OUT negativo</cat>
+  <classe>OUT active negativo</classe>
 } && @{
   GO @{@intens==1} @{ @frase=rand_pick(@mb) } & @{@intens==2} @{ @frase=rand_pick(@mm) } && @{ @frase=rand_pick(@mf) }
   GO @{@intens==1} @{ @nota=rand_pick(@note_b) } & @{@intens==2} @{ @nota=rand_pick(@note_m) } && @{ @nota=rand_pick(@note_f) }
@@ -292,225 +192,12 @@ GO @{@raro == 1} @{
   <badge>OUT I SEGNI SONO VELATI — INTENSITA' @intens / 3</badge>
   <frase>OUT @frase</frase>
   <nota>OUT @nota</nota>
-  <cat>OUT misterioso</cat>
+  <classe>OUT active misterioso</classe>
 }
-<contatore>OUT CONSULTA @n</contatore>`;
 
-// ── JS: solo trigger + applica categoria dal DOM ──────────────
-const CATS = ['positivo','negativo','misterioso','ultra'];
-let busy = false, n = 0;
-
-document.getElementById('trigger').addEventListener('click', async () => {
-  if (busy) return; busy = true;
-
-  // Reset
-  document.body.classList.remove('active', ...CATS);
-  document.getElementById('frase').textContent  = '';
-  document.getElementById('simbolo').textContent = '';
-  document.getElementById('badge').textContent  = '';
-  document.getElementById('nota').textContent   = '';
-  document.getElementById('cat').textContent    = '';
-
-  n++;
-  await LINE_dom(ORACLE.replace('__N__', n), { replace: true });
-
-  // Legge la categoria scritta da LINE e la applica al body
-  const cat = document.getElementById('cat').textContent.trim();
-  document.body.classList.add('active', cat);
-  busy = false;
-});
+<contatore>OUT CONSULTA __N__</contatore>
 </script>
-</body>
-</html>
-indovinate = []
-vinto      = F
-perso      = F
-THEN conta
-  tmp = []
-  #i  = 0
-  GO @{@i < @lunghezza} @{
-    c = str_sub(@parola, @i, @i + 1)
-    GO @{!list_has(@tmp, @c)} @{
-      ADD tmp AT = @c
-      #uniche += 1
-    }
-    #i += 1
-  } #c
-THEND
-conta()
-THEN gallows
-  OUT  +--------+
-  OUT  |        |
-  GO @{@errori >= 1} @{ OUT  |        O } && @{ OUT  | }
-  GO @{@errori >= 3} @{ OUT  |       /|\\ } & @{@errori == 2} @{ OUT  |       /| } && @{ OUT  | }
-  GO @{@errori >= 4} @{ OUT  |        | } && @{ OUT  | }
-  GO @{@errori >= 6} @{ OUT  |       / \\ } & @{@errori == 5} @{ OUT  |       / } && @{ OUT  | }
-  OUT  |
-  OUT  +==========
-THEND
-THEN stampa
-  chars = []
-  #j = 0
-  GO @{@j < @lunghezza} @{
-    ADD chars AT = str_sub(@parola, @j, @j + 1)
-    #j += 1
-  } #c
-  riga = 
-  FOR @chars #[;;] = @{
-    GO @{list_has(@indovinate, @ONITEM)} @{
-      @riga = @riga + @ONITEM
-    } && @{
-      @riga = @riga + @ch_
-    }
-    @riga = @riga + @sp
-  }
-  OUT  [ @riga]
-THEND
-THEN stato
-  #rim = @MAX - @errori
-  gallows()
-  stampa()
-  OUT  Errori: @errori/@MAX   rimasti: @rim
-  OUT  ------------------------------------------
-THEND
-OUT  IMPICCATO — parola di @lunghezza lettere
-OUT  ==========================================
-stato()
-IF finita = @vinto VEL @perso
-TALK:V > Lettera:
-GO @{!@finita} @{
-  TALK @ASKED
-  inp = str_lower(@ASKED)
-  #ll  = str_len(@inp)
-  #cod = str_code(@inp)
-  IF valido = @ll == 1 ET @cod >= 97 ET @cod <= 122
-  GO @{!@valido} @{
-    OUT  [!] Inserisci una lettera a-z!
-  } & @{list_has(@indovinate, @inp)} @{
-    OUT  [~] Gia' tentata!
-  } & @{str_contains(@parola, @inp)} @{
-    ADD indovinate AT = @inp
-    #ok += 1
-    OUT  [+] Esatto!
-    GO @{@ok >= @uniche} @{
-      TALK:F
-      vinto = V
-    }
-  } && @{
-    ADD indovinate AT = @inp
-    #errori += 1
-    #r = @MAX - @errori
-    OUT  [-] Sbagliato! Rimangono @r errori.
-    GO @{@errori >= @MAX} @{
-      TALK:F
-      perso = V
-    }
-  }
-  GO @{!@vinto ET !@perso} @{
-    stato()
-  }
-} #c
-GO @{@vinto} @{
-  OUT  ==========================================
-  OUT  [*] COMPLIMENTI! HAI VINTO!
-  stampa()
-} && @{
-  gallows()
-  OUT  ==========================================
-  OUT  [x] SEI STATO IMPICCATO!
-}
-OUT  La parola era: @parola`;
 
-/* ══════════════════════════════════════════════════
-   JS BRIDGE — solo rendering, zero logica
-══════════════════════════════════════════════════ */
-const CATS = ['positivo','negativo','misterioso','ultra'];
-const VEL  = { 1:'10s', 2:'5s', 3:'2s' };
-const LABEL = { positivo:'Responso favorevole', negativo:'Presagio oscuro', misterioso:'I segni sono velati', ultra:'Responso rarissimo' };
 
-// ── Nav ───────────────────────────────────────────
-let gameRunning = false;
-function show(id, btn) {
-  document.querySelectorAll('section').forEach(s => s.classList.remove('on'));
-  document.querySelectorAll('.nb').forEach(b => b.classList.remove('on'));
-  document.getElementById(id).classList.add('on');
-  btn.classList.add('on');
-  if (id === 's-hangman' && !gameRunning) startGame();
-}
-
-// ── Oracle bridge ─────────────────────────────────
-let busy = false, n = 0;
-const orbEl  = document.getElementById('orb');
-const MIST   = orbEl.querySelector('.orb-mist');
-
-orbEl.addEventListener('click', async () => {
-  if (busy) return; busy = true;
-  orbEl.classList.remove('pulse', ...CATS); void orbEl.offsetWidth; orbEl.classList.add('pulse');
-  document.getElementById('answer').classList.add('hidden');
-  document.getElementById('badge').classList.remove('on', ...CATS);
-  document.getElementById('nota').classList.remove('on');
-  n++;
-  const righe = [];
-  await LINE_run(ORACLE.replace('__N__', n), { output: s => righe.push(s), input: () => Promise.resolve('') });
-  const d = {};
-  righe.forEach(r => { const i = r.indexOf(':'); if (i > 0) d[r.slice(0,i)] = r.slice(i+1); });
-  await new Promise(r => setTimeout(r, 350));
-  const cat = d.cat || '';
-  orbEl.classList.add(cat);
-  MIST.style.animationDuration = VEL[d.vel] || '8s';
-  document.getElementById('sym').textContent   = d.sym || '✦';
-  const b = document.getElementById('badge');
-  b.textContent = d.badge || ''; b.className = `badge ${cat} on`;
-  const a = document.getElementById('answer');
-  a.textContent = d.frase || '…'; a.classList.remove('hidden');
-  const nn = document.getElementById('nota');
-  nn.textContent = d.nota || ''; nn.classList.add('on');
-  const cc = document.getElementById('cntEl');
-  cc.textContent = `Consulta numero ${n}`; cc.classList.add('on');
-  document.getElementById('hint').textContent = 'Consulta di nuovo';
-  busy = false;
-});
-
-// ── Hangman bridge ────────────────────────────────
-let inputResolve = null;
-const consoleEl = document.getElementById('console');
-const inpEl     = document.getElementById('inp');
-
-// Colora le righe in base al prefisso
-function appendLine(s) {
-  const p = document.createElement('p');
-  p.textContent = s;
-  if (s.startsWith('[+]')) p.className = 'ok';
-  else if (s.startsWith('[-]') || s.startsWith('[x]')) p.className = 'err';
-  else if (s.startsWith('[*]') || s.startsWith('IMPICCATO')) p.className = 'hdr';
-  else if (s.startsWith('[~]') || s.startsWith('[!]')) p.className = 'dim';
-  consoleEl.appendChild(p);
-  consoleEl.scrollTop = consoleEl.scrollHeight;
-}
-
-function submitInput() {
-  if (!inputResolve) return;
-  inputResolve(inpEl.value);
-  inpEl.value = '';
-  inputResolve = null;
-}
-document.getElementById('btn-send').onclick = submitInput;
-inpEl.onkeydown = e => e.key === 'Enter' && submitInput();
-
-async function startGame() {
-  gameRunning = true;
-  consoleEl.innerHTML = '';
-  document.getElementById('btn-new').style.display = 'none';
-  inpEl.disabled = false;
-  await LINE_run(HANGMAN, {
-    output: appendLine,
-    input: () => new Promise(r => { inputResolve = r; inpEl.focus(); })
-  });
-  gameRunning = false;
-  inpEl.disabled = true;
-  document.getElementById('btn-new').style.display = '';
-}
-document.getElementById('btn-new').onclick = startGame;
-</script>
 </body>
 </html>
